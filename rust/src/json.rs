@@ -2,6 +2,7 @@
 //! ECMAScript `JSON.stringify` (number formatting, string escaping and the
 //! array-index-first key order of ECMAScript objects).
 
+use alloc::collections::BTreeMap;
 use alloc::format;
 use alloc::string::{String, ToString};
 use alloc::vec::Vec;
@@ -303,11 +304,13 @@ impl Parser<'_> {
             }
             Some(b'{') => {
                 self.i += 1;
-                let mut o = Value::Obj(Vec::new());
+                let mut m: Vec<(String, Value)> = Vec::new();
+                // key -> position, so duplicate handling stays O(log n) per key
+                let mut index: BTreeMap<String, usize> = BTreeMap::new();
                 self.ws();
                 if self.peek() == Some(b'}') {
                     self.i += 1;
-                    return Ok(o);
+                    return Ok(Value::Obj(m));
                 }
                 loop {
                     self.ws();
@@ -322,13 +325,19 @@ impl Parser<'_> {
                     self.i += 1;
                     self.ws();
                     let v = self.value(depth + 1)?;
-                    o.set(&k, v);
+                    match index.get(&k) {
+                        Some(&pos) => m[pos].1 = v,
+                        None => {
+                            index.insert(k.clone(), m.len());
+                            m.push((k, v));
+                        }
+                    }
                     self.ws();
                     match self.peek() {
                         Some(b',') => self.i += 1,
                         Some(b'}') => {
                             self.i += 1;
-                            return Ok(o);
+                            return Ok(Value::Obj(m));
                         }
                         _ => return self.err("expected , or }"),
                     }
