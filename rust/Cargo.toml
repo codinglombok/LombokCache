@@ -1,0 +1,22 @@
+[package]
+name = "lombokcache"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.70"
+description = "Deterministic in-memory cache: TTL with an injectable clock, LRU eviction, tags, counters and statistics. Part of the Lombok Ecosystem."
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/codinglombok/LombokCache"
+homepage = "https://github.com/codinglombok/LombokCache"
+readme = "../README.md"
+keywords = ["cache", "lru", "ttl", "memoization", "in-memory"]
+exclude = ["tests/*", ".gitignore"]
+categories = ["caching", "no-std", "data-structures"]
+
+[features]
+default = ["std"]
+std = []
+
+[dependencies]
+
+[lib]
+path = "src/lib.rs"

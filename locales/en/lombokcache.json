@@ -1,0 +1,6 @@
+{
+  "lombokcache.error.invalid_key": "The cache key or tag must be 1 to 250 UTF-8 bytes without control characters.",
+  "lombokcache.error.invalid_ttl": "The time to live must be a whole number of milliseconds of at least 1, or null.",
+  "lombokcache.error.invalid_option": "A cache option or script step is invalid.",
+  "lombokcache.error.invalid_value": "The value is not storable JSON data or is not an integer where one is required."
+}

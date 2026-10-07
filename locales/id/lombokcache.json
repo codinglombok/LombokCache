@@ -1,0 +1,6 @@
+{
+  "lombokcache.error.invalid_key": "Kunci atau tag cache harus 1 sampai 250 byte UTF-8 tanpa karakter kontrol.",
+  "lombokcache.error.invalid_ttl": "Masa berlaku harus bilangan bulat milidetik paling kecil 1, atau null.",
+  "lombokcache.error.invalid_option": "Opsi cache atau langkah skrip tidak sah.",
+  "lombokcache.error.invalid_value": "Nilai bukan data JSON yang dapat disimpan atau bukan bilangan bulat di tempat yang memerlukannya."
+}
