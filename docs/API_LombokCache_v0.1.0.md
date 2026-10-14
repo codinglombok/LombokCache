@@ -1,14 +1,14 @@
 # API LombokCache v0.1.0
 
-Semantik normatif ada di `SPEC_LombokCache_v0.1.0.md`; dokumen ini hanya mendaftar antarmuka yang benar-benar diekspor.
+Normative semantics are in `SPEC_LombokCache_v0.1.0.md`; this document only lists the interfaces that are actually exported.
 
-## 1. TypeScript (paket `lombokcache`)
+## 1. TypeScript (package `lombokcache`)
 
-Stabilitas: 0.x, dapat berubah pada rilis minor.
+Stability: 0.x, may change in minor releases.
 
-| Simbol | Tanda tangan | Keterangan |
+| Symbol | Signature | Notes |
 |---|---|---|
-| `Cache` | `new Cache(options?: CacheOptions)` | Sejak 0.1.0 |
+| `Cache` | `new Cache(options?: CacheOptions)` | Since 0.1.0 |
 | `CacheOptions` | `{ maxEntries?: number; defaultTtl?: number \| null; clock?: () => number }` | |
 | `SetOptions` | `{ ttl?: number \| null; tags?: string[] }` | |
 | `Cache#set` | `(key, value, options?) => true` | |
@@ -19,36 +19,36 @@ Stabilitas: 0.x, dapat berubah pada rilis minor.
 | `Cache#remember` | `(key, factory: () => unknown, options?) => Json` | |
 | `Cache#increment`, `Cache#decrement` | `(key, by = 1, options?) => number` | |
 | `Cache#touch` | `(key, ttl?) => boolean` | |
-| `Cache#ttl` | `(key) => number` | `-1`, `-2`, atau sisa milidetik |
+| `Cache#ttl` | `(key) => number` | `-1`, `-2`, or the remaining milliseconds |
 | `Cache#invalidateTag` | `(tag) => number` | |
 | `Cache#prune`, `Cache#size`, `Cache#clear` | `() => number` | |
-| `Cache#keys` | `() => string[]` | Urutan recency |
+| `Cache#keys` | `() => string[]` | Recency order |
 | `Cache#stats` | `() => Stats` | |
-| `run` | `(options, steps) => Json[]` | Titik masuk kontrak (skrip) |
+| `run` | `(options, steps) => Json[]` | Contract entry point (scripts) |
 | `makeKey` | `(namespace, ...parts) => string` | |
 | `validateKey` | `(key) => string` | |
-| `OPS`, `MAX_KEY_BYTES` | konstanta | |
-| `LombokCacheError` | `extends Error`; `code`, `messageId` | Kode: SPEC bagian 9 |
+| `OPS`, `MAX_KEY_BYTES` | constants | |
+| `LombokCacheError` | `extends Error`; `code`, `messageId` | Codes: SPEC section 9 |
 
 ## 2. Rust (crate `lombokcache`)
 
-Fitur: `std` (bawaan). Tanpa `std`, crate bersifat `no_std + alloc`.
+Feature: `std` (default). Without `std`, the crate is `no_std + alloc`.
 
-| Simbol | Keterangan |
+| Symbol | Notes |
 |---|---|
-| `Cache<C: Fn() -> u64>` | `new(CacheOptions, clock) -> Result<Cache>`; metode `set`, `add`, `get`, `peek`, `has`, `delete`, `pull`, `remember(key, FnOnce() -> Result<Value>, &SetOptions)`, `increment`, `decrement`, `touch(key, Ttl)`, `ttl`, `invalidate_tag`, `prune`, `size`, `keys`, `clear`, `stats` |
+| `Cache<C: Fn() -> u64>` | `new(CacheOptions, clock) -> Result<Cache>`; methods `set`, `add`, `get`, `peek`, `has`, `delete`, `pull`, `remember(key, FnOnce() -> Result<Value>, &SetOptions)`, `increment`, `decrement`, `touch(key, Ttl)`, `ttl`, `invalidate_tag`, `prune`, `size`, `keys`, `clear`, `stats` |
 | `CacheOptions { max_entries, default_ttl }` | |
 | `SetOptions { ttl: Ttl, tags }`, `Ttl` (`Default`, `Never`, `Ms(u64)`) | |
-| `Stats` | `to_value()` dengan urutan kunci kontrak |
-| `run(&Value, &Value)`, `call(fn, args)` | Titik masuk kontrak |
+| `Stats` | `to_value()` with the contract key order |
+| `run(&Value, &Value)`, `call(fn, args)` | Contract entry points |
 | `make_key(&[&str])`, `validate_key(&str)` | |
-| `json::Value`, `parse_json` | JSON internal |
+| `json::Value`, `parse_json` | Internal JSON |
 | `Error { code, message }` | `message_id()` |
 
-## 3. Port lain
+## 3. Other ports
 
-Belum ada.
+None yet.
 
-## 4. Kompatibilitas lintas bahasa
+## 4. Cross-language compatibility
 
-Untuk skrip yang sama, TypeScript dan Rust menghasilkan keluaran identik pada seluruh vector (142 kasus, 1694 langkah).
+For the same script, TypeScript and Rust produce identical output on all vectors (142 cases, 1694 steps).

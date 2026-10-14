@@ -1,17 +1,17 @@
 # Guide How To Use LombokCache v0.1.0
 
-## Instalasi
+## Installation
 
-Belum terbit. Setelah rilis: `npm install lombokcache` atau `cargo add lombokcache`. Sebelum itu, bangun dari repo (lihat `CONTRIBUTING.md`).
+Not published yet. After the release: `npm install lombokcache` or `cargo add lombokcache`. Until then, build from the repository (see `CONTRIBUTING.md`).
 
-## Konsep dasar
+## Basic concepts
 
-1. Entri berisi nilai JSON, waktu kedaluwarsa, dan tag.
-2. Jam dipasok lewat opsi `clock` (bawaan `Date.now`). Dalam test, pakai variabel yang Anda ubah sendiri.
-3. Entri hidup selama `now < expiresAt`; tepat pada `expiresAt` entri sudah kedaluwarsa.
-4. Dengan `maxEntries`, entri kedaluwarsa dibersihkan lebih dulu, lalu yang paling lama tidak dipakai dikeluarkan.
+1. An entry holds a JSON value, an expiry time and tags.
+2. The clock is supplied through the `clock` option (default `Date.now`). In tests, use a variable that you change yourself.
+3. An entry is alive while `now < expiresAt`; exactly at `expiresAt` the entry has expired.
+4. With `maxEntries`, expired entries are purged first, and then the least recently used one is evicted.
 
-## Contoh
+## Example
 
 ```ts
 import { Cache } from "lombokcache";
@@ -22,7 +22,7 @@ const user = cache.remember(`user:${id}`, () => loadUserFromDb(id));
 
 ## Recipes
 
-### Counter jendela tetap (rate limit sederhana)
+### A fixed-window counter (simple rate limit)
 
 ```ts
 import { Cache, makeKey } from "lombokcache";
@@ -30,7 +30,7 @@ const hit = (ip: string) => cache.increment(makeKey("rl", ip, String(Math.floor(
 if (hit(clientIp) > 100) reject();
 ```
 
-### Invalidasi berkelompok
+### Grouped invalidation
 
 ```ts
 cache.set("post:1", post1, { tags: ["posts"] });
@@ -38,7 +38,7 @@ cache.set("post:2", post2, { tags: ["posts"] });
 cache.invalidateTag("posts");   // 2
 ```
 
-### Test TTL tanpa menunggu
+### Testing TTL without waiting
 
 ```ts
 let now = 0;
@@ -50,13 +50,13 @@ c.get("k");   // null
 
 ## Common pitfalls
 
-- `get` mengembalikan `null` untuk miss; bila `null` adalah nilai sah, pakai `has` atau `get(key, sentinel)`.
-- `has`, `peek`, dan `ttl` tidak memperbarui urutan LRU.
-- `increment` pada kunci yang ada **tidak** memperpanjang TTL; pakai `touch` bila perlu.
-- Menulis ulang kunci mengganti tag-nya; tag lama tidak dipertahankan.
-- Hanya data JSON yang dapat disimpan; fungsi, `NaN`, dan `undefined` ditolak.
-- Cache ini dalam proses; setiap instans serverless atau worker memiliki cache sendiri.
+- `get` returns `null` for a miss; when `null` is a valid value, use `has` or `get(key, sentinel)`.
+- `has`, `peek` and `ttl` do not update the LRU order.
+- `increment` on an existing key does **not** extend its TTL; use `touch` if you need that.
+- Writing a key again replaces its tags; the old tags are not kept.
+- Only JSON data can be stored; functions, `NaN` and `undefined` are rejected.
+- This cache is in-process; every serverless instance or worker has its own cache.
 
-## Lihat juga
+## See also
 
 README, SPEC_, API_.

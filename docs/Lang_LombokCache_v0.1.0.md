@@ -1,32 +1,32 @@
 # Lang LombokCache v0.1.0
 
-## 1. Tingkat i18n
+## 1. i18n level
 
-Tingkat **E** (pesan error dan dokumentasi saja). Library tidak menghasilkan teks untuk pengguna akhir selain pesan galat.
+Level **E** (error messages and documentation only). The library produces no end-user text other than error messages. The source language of all messages and documentation is English.
 
-## 2. Katalog ID pesan (normatif)
+## 2. Message ID catalog (normative)
 
-Format `lombokcache.<jenis>.<kode>`. Berkas katalog: `locales/<bcp47>/lombokcache.json`, satu berkas untuk semua port.
+Format `lombokcache.<kind>.<code>`. Catalog files: `locales/<bcp47>/lombokcache.json`, one file for all ports.
 
-| ID | Teks sumber (en) | Kode galat |
+| ID | Source text (en) | Error code |
 |---|---|---|
 | `lombokcache.error.invalid_key` | The cache key or tag must be 1 to 250 UTF-8 bytes without control characters. | `invalid_key` |
 | `lombokcache.error.invalid_ttl` | The time to live must be a whole number of milliseconds of at least 1, or null. | `invalid_ttl` |
 | `lombokcache.error.invalid_option` | A cache option or script step is invalid. | `invalid_option` |
 | `lombokcache.error.invalid_value` | The value is not storable JSON data or is not an integer where one is required. | `invalid_value` |
 
-Galat membawa `code` (kontrak, sama di semua port) dan `messageId`. Pesan `message` di objek galat berbahasa Inggris dan tidak bersifat normatif.
+An error carries `code` (contract, the same in all ports) and `messageId`. The `message` field of the error object is in English and is not normative.
 
-## 3. Cakupan saat ini
+## 3. Current coverage
 
-Core-20: 2 dari 20 (`en`, `id`). Paket Nusantara: 0 dari 6. Bahasa lain belum ada. Katalog bahasa tambahan harus ditinjau penutur asli sebelum diterima.
+Core-20: 2 of 20 (`en`, `id`). Nusantara pack: 0 of 6. No other languages yet. Catalogs for additional languages must be reviewed by a native speaker before they are accepted.
 
-## 4. Cara menambah bahasa
+## 4. How to add a language
 
-1. Salin `locales/en/lombokcache.json` ke `locales/<bcp47>/lombokcache.json`.
-2. Terjemahkan nilai; kunci tidak diubah.
-3. Minta tinjauan penutur asli, lalu ajukan PR.
+1. Copy `locales/en/lombokcache.json` to `locales/<bcp47>/lombokcache.json`.
+2. Translate the values; keys are not changed.
+3. Ask a native speaker to review, then open a pull request.
 
-## 5. Ketergantungan LombokLocale
+## 5. Dependency on LombokLocale
 
-Tidak ada pada 0.1.0. Konsumen yang memakai LombokLocale dapat me-resolve `messageId` terhadap katalog di atas.
+None in 0.1.0. A consumer that uses LombokLocale can resolve `messageId` against the catalogs above.

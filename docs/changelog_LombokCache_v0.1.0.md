@@ -1,14 +1,14 @@
-# Changelog LombokCache (ringkasan)
+# Changelog LombokCache (summary)
 
-Entri terbaru di depan. Rincian ada di `CHANGELOG.md`.
+The newest entry comes first. Details are in `CHANGELOG.md`.
 
 ## 0.1.0 - 2026-10-07
 
 ### Added
-- `Cache` dengan TTL, LRU, tag, counter, statistik; `run`, `makeKey`.
-- Port Rust `no_std + alloc` dan port TypeScript.
-- Vector 142 kasus; runner di kedua port; fuzz, uji mutasi.
+- `Cache` with TTL, LRU, tags, counters and statistics; `run`, `makeKey`.
+- Rust `no_std + alloc` port and TypeScript port.
+- 142 vectors; runners in both ports; fuzzing and mutation testing.
 
 ### Security
-- Entri kedaluwarsa tidak pernah dikembalikan; jumlah entri tidak pernah melebihi `maxEntries`.
-- Nilai disalin saat masuk dan keluar; `makeKey` injektif.
+- An expired entry is never returned; the number of entries never exceeds `maxEntries`.
+- Values are copied on the way in and out; `makeKey` is injective.

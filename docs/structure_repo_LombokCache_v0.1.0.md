@@ -1,12 +1,12 @@
 # Structure Repo LombokCache v0.1.0
 
-## 1. Struktur folder
+## 1. Folder structure
 
 ```
 LombokCache/
   README.md  CHANGELOG.md  SECURITY.md  CONTRIBUTING.md  version.txt
   LICENSE-APACHE  LICENSE-MIT  .gitignore  .gitattributes
-  docs/            10 dokumen standar + TECH_DEBT.md (masterplan_ dan architecture_ tidak di-commit)
+  docs/            10 standard documents + TECH_DEBT.md (masterplan_ and architecture_ are not committed)
   vectors/         lombokcache-vectors-v1.json  README.md
   locales/         en/lombokcache.json  id/lombokcache.json
   rust/            Cargo.toml  src/{lib.rs,json.rs}  tests/vectors.rs  LICENSE-*
@@ -15,21 +15,21 @@ LombokCache/
   .github/workflows/  ci.yml
 ```
 
-## 2. Konvensi penamaan
+## 2. Naming conventions
 
-Dokumen: `<jenis>_LombokCache_v<semver>.md`. Paket: npm `lombokcache`, crates.io `lombokcache`. Go (rencana): `github.com/codinglombok/lombokcache/go`.
+Documents: `<kind>_LombokCache_v<semver>.md`. Packages: npm `lombokcache`, crates.io `lombokcache`. Go (planned): `github.com/codinglombok/lombokcache/go`.
 
-## 3. Berkas wajib di root
+## 3. Required root files
 
-README, LICENSE-APACHE, LICENSE-MIT, CHANGELOG, SECURITY, CONTRIBUTING, `.gitignore` dengan tiga baris ADR-024, `version.txt`.
+README, LICENSE-APACHE, LICENSE-MIT, CHANGELOG, SECURITY, CONTRIBUTING, `.gitignore` with the three ADR-024 lines, `version.txt`.
 
-## 4. Struktur per port
+## 4. Structure per port
 
-| Port | Isi |
+| Port | Contents |
 |---|---|
-| `rust/` | Satu crate `lombokcache`; fitur `std` (bawaan); `json.rs` adalah parser dan serializer JSON internal yang keluarannya setara `JSON.stringify`; `tests/` dikecualikan dari paket crates.io karena membaca `../vectors` |
-| `typescript/` | `src/cache.ts` (`Cache`, `run`, `makeKey`), `src/index.ts`; `test/` dikompilasi ke `dist-test/` |
+| `rust/` | One crate `lombokcache`; feature `std` (default); `json.rs` is the internal JSON parser and serializer whose output equals `JSON.stringify`; `tests/` is excluded from the crates.io package because it reads `../vectors` |
+| `typescript/` | `src/cache.ts` (`Cache`, `run`, `makeKey`), `src/index.ts`; `test/` is compiled to `dist-test/` |
 
-## 5. Catatan
+## 5. Notes
 
-`LICENSE-*` di `rust/` adalah salinan dari root agar ikut paket crate. `typescript/` menyalin README dan LICENSE saat `npm pack` (skrip `prepack`/`postpack`). Fungsi `call(fn, args)` di port Rust adalah titik masuk dinamis yang dipakai runner vector dan host FFI.
+`LICENSE-*` in `rust/` are copies of the root files so that they ship in the crate. `typescript/` copies the README and the licenses during `npm pack` (scripts `prepack`/`postpack`). The function `call(fn, args)` in the Rust port is the dynamic entry point used by the vector runner and by FFI hosts. Stray backup files (`*.bak`) must never be committed.

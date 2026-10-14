@@ -1,42 +1,42 @@
 # Full Summary LombokCache v0.1.0
 
-## Apa ini
+## What it is
 
-Cache in-memory deterministik dengan TTL berjam suntik, eviksi LRU, tag, counter, dan statistik, yang perilakunya dispesifikasikan sampai kasus tepi.
+A deterministic in-memory cache with TTL driven by an injected clock, LRU eviction, tags, counters and statistics, whose behavior is specified down to the edge cases.
 
-## Mengapa dibuat
+## Why it exists
 
-Cache sederhana mudah ditulis tetapi sulit diuji karena bergantung pada jam sistem, dan semantik tepinya (batas kedaluwarsa, apakah pembacaan memperbarui urutan LRU, kapan eviksi terjadi) berbeda antar implementasi. Kontrak bersama membuat perilaku yang sama di semua bahasa dapat diuji tanpa menunggu waktu berlalu.
+A simple cache is easy to write but hard to test because it depends on the system clock, and its edge semantics (the expiry boundary, whether a read updates the LRU order, when eviction happens) differ between implementations. A shared contract makes the same behavior testable in every language without waiting for time to pass.
 
-## Fitur utama
+## Main features
 
-Lihat README (bagian Fitur). Semua fitur dicakup vector.
+See the README (Features section). All features are covered by vectors.
 
-## Status saat ini
+## Current status
 
-Kode lengkap untuk Rust dan TypeScript; lulus 142 kasus vector; belum terbit di registry; belum memenuhi aturan skor rilis (lihat `TECH_DEBT.md`).
+Complete code for Rust and TypeScript; passes 142 vector cases; not yet published to any registry; does not yet meet the release score rule (see `TECH_DEBT.md`).
 
-## Contoh pemakai
+## Example users
 
-Lihat README (skenario pemakaian).
+See the README (usage scenarios).
 
-## Batasan yang Diketahui
+## Known Limitations
 
-- Hanya dalam proses; tidak ada adapter eksternal.
-- Port Rust tidak thread-safe tanpa pembungkus `Mutex`.
-- `invalidateTag`, `prune`, dan pembersihan sebelum eviksi berbiaya O(n).
-- Tidak ada perlindungan stampede dan batas ukuran dalam byte.
-- Hanya dua port (Rust, TypeScript); fuzz berupa pseudo-fuzz, belum `cargo-fuzz`; belum audit pihak ketiga; coverage belum diukur.
+- In-process only; no external adapters.
+- The Rust port is not thread-safe without a `Mutex` wrapper.
+- `invalidateTag`, `prune` and the purge before eviction cost O(n).
+- No stampede protection and no size limit in bytes.
+- Only two ports (Rust, TypeScript); fuzzing is pseudo-fuzzing, not `cargo-fuzz`; no third-party audit; coverage not measured yet.
 
-## Info lanjut
+## More information
 
-SPEC_, API_, `development_ide_`.
+`SPEC_`, `API_`, `development_ide_`.
 
-## Gap vs pembanding (U6)
+## Gap vs comparators (U6)
 
-Perbandingan bersifat kualitatif dan berdasarkan pengetahuan umum tentang kategori library; belum diverifikasi fitur demi fitur pada 2026-10-07.
+The comparison is qualitative and based on general knowledge of each category of library; it has not been verified feature by feature on 2026-10-07.
 
-| Pembanding (kategori) | Yang dimiliki pembanding dan belum dimiliki LombokCache | Yang ditawarkan LombokCache |
+| Comparator (category) | What the comparator has that LombokCache does not | What LombokCache offers |
 |---|---|---|
-| Cache dalam proses (lru-cache, node-cache, moka, cachetools, Caffeine) | Konkurensi, batas berbasis ukuran, statistik lanjutan, refresh asinkron, kinerja teruji | Kontrak semantik lintas bahasa dengan skrip bersama; jam suntik; tag; inti `no_std + alloc` |
-| Cache terdistribusi (Redis, Memcached) | Berbagi antar proses, persistensi, replikasi | Tanpa server; dapat diuji deterministik |
+| In-process caches (lru-cache, node-cache, moka, cachetools, Caffeine) | Concurrency, size-based limits, advanced statistics, asynchronous refresh, proven performance | A cross-language semantic contract with shared scripts; an injected clock; tags; a `no_std + alloc` core |
+| Distributed caches (Redis, Memcached) | Sharing between processes, persistence, replication | No server; deterministically testable |

@@ -2,110 +2,110 @@
 
 This document is the normative cross-language contract. Every language port MUST produce byte-identical output for all specified inputs. Deviations from this specification are bugs.
 
-Key words MUST, MUST NOT, SHOULD and MAY are interpreted as in RFC 2119 and RFC 8174.
+The key words MUST, MUST NOT, SHOULD and MAY are to be interpreted as in RFC 2119 and RFC 8174.
 
-| Atribut | Nilai |
+| Attribute | Value |
 |---|---|
-| Versi kontrak | 0.1.0 |
-| Tanggal tinjauan standar acuan | 2026-10-07 |
-| Vector | `vectors/lombokcache-vectors-v1.json` |
-| SHA-256 vector | `24e5dfcebc1aaab7021ceea1a0d73675cf1d7e1a0dd7b84fe591ab3b735e3601` |
+| Contract version | 0.1.0 |
+| Review date of reference standards | 2026-10-07 |
+| Vectors | `vectors/lombokcache-vectors-v1.json` |
+| Vector SHA-256 | `24e5dfcebc1aaab7021ceea1a0d73675cf1d7e1a0dd7b84fe591ab3b735e3601` |
 
-## 0. Standar acuan (U2)
+## 0. Reference standards (U2)
 
-| Acuan | Versi | Pemakaian |
+| Reference | Version | Use |
 |---|---|---|
-| RFC 8259 | Desember 2017 | Nilai yang disimpan adalah data JSON |
-| RFC 3629 | November 2003 | Panjang kunci dalam byte UTF-8 |
-| Perintah `TTL` Redis | 7.x | Konvensi nilai `-1` dan `-2` pada `ttl` |
-| RFC 2119, RFC 8174 | 1997, 2017 | Kata kunci normatif |
+| RFC 8259 | December 2017 | Stored values are JSON data |
+| RFC 3629 | November 2003 | Key length in UTF-8 bytes |
+| Redis `TTL` command | 7.x | The convention of the values `-1` and `-2` in `ttl` |
+| RFC 2119, RFC 8174 | 1997, 2017 | Normative key words |
 
-## 1. Vector
+## 1. Vectors
 
-Berkas vector memuat `{ format, specVersion, note, groups }`. Setiap kasus memuat `name`, `fn`, `args`, dan `expect` (`{ "result": ... }` atau `{ "error": code }`). Fungsi `run(options, steps)` menjalankan skrip pada cache baru dan menghasilkan satu keluaran per langkah. Setiap port yang diklaim MUST menjalankan seluruh kasus dan menghasilkan keluaran yang sama secara struktural. Hash SHA-256 berkas MUST sama dengan tabel atribut.
+The vector file contains `{ format, specVersion, note, groups }`. Each case contains `name`, `fn`, `args` and `expect` (`{ "result": ... }` or `{ "error": code }`). The function `run(options, steps)` runs a script on a fresh cache and produces one output per step. Every claimed port MUST run all cases and produce structurally equal output. The SHA-256 hash of the file MUST equal the one in the attribute table.
 
 ## 2. Model
 
-Cache menyimpan entri `{ value, expiresAt, tags }` dan urutan pemakaian (recency). Waktu adalah bilangan bulat milidetik 0..2^53-1 yang dibaca dari jam milik pemanggil pada setiap operasi; jam yang mengembalikan nilai lain MUST menghasilkan `invalid_option`. Waktu boleh mundur.
+The cache stores entries `{ value, expiresAt, tags }` and a usage order (recency). Time is an integer number of milliseconds in 0..2^53-1 read from the caller's clock on every operation; a clock that returns any other value MUST produce `invalid_option`. Time may go backwards.
 
-Sebuah entri **hidup** pada waktu `now` bila `expiresAt` null atau `now < expiresAt`. `expiresAt = min(now + ttl, 2^53 - 1)`. Entri yang tidak hidup dihapus secara malas saat operasi menyentuh kuncinya dan dihitung sebagai `expirations`.
+An entry is **alive** at time `now` if `expiresAt` is null or `now < expiresAt`. `expiresAt = min(now + ttl, 2^53 - 1)`. An entry that is not alive is removed lazily when an operation touches its key and is counted as `expirations`.
 
-**Kunci dan tag**: string 1..250 byte UTF-8 tanpa U+0000..U+001F dan U+007F; selain itu `invalid_key`.
+**Keys and tags**: strings of 1..250 UTF-8 bytes without U+0000..U+001F and U+007F; otherwise `invalid_key`.
 
-**Nilai**: data JSON (null, boolean, angka berhingga, string, array, objek) dengan kedalaman paling besar 512; selain itu `invalid_value`. Nilai MUST disalin saat disimpan dan saat dikembalikan.
+**Values**: JSON data (null, boolean, finite number, string, array, object) with a depth of at most 512; otherwise `invalid_value`. A value MUST be copied when it is stored and when it is returned.
 
-**TTL**: bilangan bulat 1..2^53-1 milidetik, atau `null` (tanpa kedaluwarsa); selain itu `invalid_ttl`. Bila tidak diberikan, berlaku `defaultTtl`.
+**TTL**: an integer of 1..2^53-1 milliseconds, or `null` (no expiry); otherwise `invalid_ttl`. When it is not given, `defaultTtl` applies.
 
-**Opsi tulis**: objek dengan kunci `ttl` dan `tags` (array kunci); kunci lain, bukan objek, atau `tags` bukan array MUST `invalid_option`.
+**Write options**: an object with the keys `ttl` and `tags` (an array of keys); other keys, a non-object, or `tags` that is not an array MUST produce `invalid_option`.
 
-## 3. Opsi cache
+## 3. Cache options
 
-`maxEntries`: bilangan bulat 1..2^53-1 atau tidak ada (tanpa batas). `defaultTtl`: TTL atau `null`. Kunci lain MUST `invalid_option`. Pada `run`, `clock` MUST ditolak (`invalid_option`) karena jam diatur oleh langkah.
+`maxEntries`: an integer of 1..2^53-1 or absent (unbounded). `defaultTtl`: a TTL or `null`. Other keys MUST produce `invalid_option`. In `run`, `clock` MUST be rejected (`invalid_option`) because the clock is controlled by the steps.
 
-## 4. Operasi
+## 4. Operations
 
-Setiap operasi memvalidasi argumennya menurut urutan kolom "Validasi" sebelum mengubah apa pun; satu-satunya perubahan yang dapat terjadi sebelum galat adalah penghapusan malas entri kedaluwarsa (bagian 2).
+Every operation validates its arguments in the order of the "Validation" column before changing anything; the only change that may happen before an error is the lazy removal of expired entries (section 2).
 
-| Operasi | Validasi | Hasil dan efek |
+| Operation | Validation | Result and effect |
 |---|---|---|
-| `set(key, value, options?)` | key, opsi, value | `true`. Menyimpan (bagian 5) |
-| `add(key, value, options?)` | key, opsi, value | `false` bila ada entri hidup; selain itu menyimpan dan `true` |
-| `get(key, fallback?)` | key | Nilai entri hidup (hit, recency diperbarui) atau `fallback` (bawaan null; miss) |
-| `peek(key)` | key | Nilai entri hidup atau null; tanpa recency, tanpa statistik, tanpa penghapusan |
-| `has(key)` | key | Boolean; tanpa recency dan statistik |
-| `delete(key)` | key | `true` dan `deletes`+1 bila entri hidup dihapus; selain itu `false` |
-| `pull(key, fallback?)` | key | Seperti `get`, lalu entri dihapus (`deletes`+1) bila ada |
-| `remember(key, factory, options?)` | key, opsi | Hit: nilai (recency diperbarui). Miss: hasil factory divalidasi sebagai value, lalu `misses`+1 dan disimpan |
-| `increment(key, by=1, options?)` | key, `by` bilangan bulat aman (`invalid_value`), opsi | Tidak ada entri hidup: disimpan `by` dengan TTL dan tag dari opsi. Ada: nilai MUST bilangan bulat aman (`invalid_value`), hasil MUST aman (`invalid_value`); expiry dan tag tetap; recency diperbarui; `sets`+1 |
+| `set(key, value, options?)` | key, options, value | `true`. Stores (section 5) |
+| `add(key, value, options?)` | key, options, value | `false` if a live entry exists; otherwise stores and `true` |
+| `get(key, fallback?)` | key | The value of a live entry (hit, recency updated) or `fallback` (default null; miss) |
+| `peek(key)` | key | The value of a live entry or null; no recency, no statistics, no removal |
+| `has(key)` | key | Boolean; no recency and no statistics |
+| `delete(key)` | key | `true` and `deletes`+1 if a live entry is removed; otherwise `false` |
+| `pull(key, fallback?)` | key | Like `get`, then the entry is removed (`deletes`+1) if it existed |
+| `remember(key, factory, options?)` | key, options | Hit: the value (recency updated). Miss: the factory result is validated as a value, then `misses`+1 and it is stored |
+| `increment(key, by=1, options?)` | key, `by` a safe integer (`invalid_value`), options | No live entry: stores `by` with the TTL and tags from the options. Entry exists: the value MUST be a safe integer (`invalid_value`), and the result MUST be safe (`invalid_value`); expiry and tags are kept; recency is updated; `sets`+1 |
 | `decrement(key, by=1, options?)` | key, `by` | `increment(key, -by, options)` |
-| `touch(key, ttl?)` | key, ttl | `false` bila tidak ada entri hidup; selain itu expiry diatur ulang, recency diperbarui, `true` |
-| `ttl(key)` | key | `-2` tidak ada entri hidup; `-1` tanpa kedaluwarsa; selain itu `expiresAt - now` |
-| `invalidateTag(tag)` | tag (`invalid_key`) | Menghapus semua entri bertag; mengembalikan jumlah yang hidup (`deletes`), yang tidak hidup dihitung `expirations` |
-| `prune()` | - | Menghapus semua entri tidak hidup; mengembalikan jumlahnya |
-| `size()` | - | `prune`, lalu jumlah entri |
-| `keys()` | - | `prune`, lalu kunci dari paling lama sampai paling baru dipakai |
-| `clear()` | - | `size`, lalu semua dihapus; `deletes` bertambah sebanyak hasil `size` |
-| `stats()` | - | `{ hits, misses, sets, deletes, evictions, expirations }` dengan urutan kunci ini |
+| `touch(key, ttl?)` | key, ttl | `false` if there is no live entry; otherwise expiry is reset, recency is updated, `true` |
+| `ttl(key)` | key | `-2` no live entry; `-1` no expiry; otherwise `expiresAt - now` |
+| `invalidateTag(tag)` | tag (`invalid_key`) | Removes every tagged entry; returns the number that were alive (`deletes`); those that were not alive are counted as `expirations` |
+| `prune()` | - | Removes every entry that is not alive; returns their count |
+| `size()` | - | `prune`, then the number of entries |
+| `keys()` | - | `prune`, then the keys from least recently to most recently used |
+| `clear()` | - | `size`, then everything is removed; `deletes` increases by the result of `size` |
+| `stats()` | - | `{ hits, misses, sets, deletes, evictions, expirations }` in this key order |
 
-Recency diperbarui oleh: penyimpanan, hit `get`/`pull`/`remember`, `increment` pada entri yang ada, dan `touch`.
+Recency is updated by: storing, a `get`/`pull`/`remember` hit, `increment` on an existing entry, and `touch`.
 
-## 5. Penyimpanan dan eviksi
+## 5. Storing and eviction
 
-Menyimpan kunci `k`: bila `maxEntries` ada, `k` belum tersimpan (hidup atau tidak), dan jumlah entri tersimpan sudah mencapai `maxEntries`, maka (1) semua entri tidak hidup dihapus (`expirations`), lalu (2) selama jumlah entri masih mencapai `maxEntries`, entri yang paling lama dipakai dihapus (`evictions`). Kemudian entri `k` ditulis (menggantikan entri lama berikut tag-nya) sebagai yang paling baru dipakai dan `sets`+1.
+Storing key `k`: if `maxEntries` is present, `k` is not yet stored (alive or not), and the number of stored entries has already reached `maxEntries`, then (1) all entries that are not alive are removed (`expirations`), and then (2) while the number of entries still reaches `maxEntries`, the least recently used entry is removed (`evictions`). Then the entry for `k` is written (replacing the old entry together with its tags) as the most recently used and `sets`+1.
 
-## 6. Skrip (`run`)
+## 6. Scripts (`run`)
 
-`run(options, steps)`: `options` MUST objek (bagian 3); `steps` MUST array. Jam dimulai 0. Setiap langkah MUST objek dengan `op` salah satu nama operasi bagian 4; bila ada `at`, MUST bilangan bulat 0..2^53-1 dan jam diatur ke nilai itu sebelum operasi. Pelanggaran ini menggagalkan seluruh skrip dengan `invalid_option`.
+`run(options, steps)`: `options` MUST be an object (section 3); `steps` MUST be an array. The clock starts at 0. Every step MUST be an object whose `op` is one of the operation names of section 4; if `at` is present, it MUST be an integer in 0..2^53-1 and the clock is set to that value before the operation. A violation fails the whole script with `invalid_option`.
 
-Argumen diambil dari kunci langkah: `key`, `value`, `options`, `fallback`, `by`, `ttl` (untuk `touch`), `tag`. Kunci yang tidak ada berarti argumen tidak diberikan; untuk `remember`, factory mengembalikan `value` (tidak ada: `invalid_value`). Langkah yang gagal menghasilkan `{ "$error": code }` dan skrip berlanjut.
+Arguments are taken from the keys of the step: `key`, `value`, `options`, `fallback`, `by`, `ttl` (for `touch`), `tag`. A missing key means the argument is not given; for `remember`, the factory returns `value` (missing: `invalid_value`). A step that fails produces `{ "$error": code }` and the script continues.
 
 ## 7. makeKey
 
-`makeKey(namespace, ...parts)`: setiap bagian MUST string tidak kosong (`invalid_key`). Setiap bagian di-escape (`\` menjadi `\\`, lalu `:` menjadi `\:`) dan digabung dengan `:`; hasil MUST kunci sah. `validateKey(key)` mengembalikan kunci atau `invalid_key`.
+`makeKey(namespace, ...parts)`: every part MUST be a non-empty string (`invalid_key`). Every part is escaped (`\` becomes `\\`, then `:` becomes `\:`) and the parts are joined with `:`; the result MUST be a valid key. `validateKey(key)` returns the key or `invalid_key`.
 
-## 8. Keamanan
+## 8. Security
 
-- Entri tidak hidup MUST tidak pernah dikembalikan.
-- Jumlah entri MUST tidak pernah melebihi `maxEntries` setelah operasi apa pun.
-- Nilai yang dikembalikan MUST salinan; pengubahan oleh pemanggil tidak memengaruhi cache.
-- `makeKey` MUST injektif: daftar bagian yang berbeda menghasilkan kunci yang berbeda.
-- Masukan apa pun MUST menghasilkan hasil atau galat dengan `code` pada bagian 9; panic atau pengecualian lain adalah bug.
+- An entry that is not alive MUST never be returned.
+- The number of entries MUST never exceed `maxEntries` after any operation.
+- A returned value MUST be a copy; modification by the caller does not affect the cache.
+- `makeKey` MUST be injective: different lists of parts produce different keys.
+- Any input MUST produce a result or an error with a `code` from section 9; a panic or any other exception is a bug.
 
-## 9. Galat
+## 9. Errors
 
-| `code` | Kondisi | `messageId` |
+| `code` | Condition | `messageId` |
 |---|---|---|
-| `invalid_key` | kunci atau tag tidak sah | `lombokcache.error.invalid_key` |
-| `invalid_ttl` | TTL tidak sah | `lombokcache.error.invalid_ttl` |
-| `invalid_option` | opsi cache, opsi tulis, jam, atau langkah skrip tidak sah | `lombokcache.error.invalid_option` |
-| `invalid_value` | nilai bukan data JSON, atau bukan bilangan bulat aman pada counter | `lombokcache.error.invalid_value` |
+| `invalid_key` | invalid key or tag | `lombokcache.error.invalid_key` |
+| `invalid_ttl` | invalid TTL | `lombokcache.error.invalid_ttl` |
+| `invalid_option` | invalid cache option, write option, clock or script step | `lombokcache.error.invalid_option` |
+| `invalid_value` | the value is not JSON data, or is not a safe integer for a counter | `lombokcache.error.invalid_value` |
 
 ## 10. Non-goals (0.1.0)
 
-Adapter penyimpanan eksternal, akses bersamaan antar thread atau proses, perlindungan stampede, batas ukuran dalam byte, dan serialisasi isi cache.
+External storage adapters, concurrent access between threads or processes, stampede protection, size limits in bytes, and serialization of the cache content.
 
-## 11. Riwayat perubahan kontrak
+## 11. Contract change history
 
-| Versi | Perubahan |
+| Version | Change |
 |---|---|
-| 0.1.0 | Kontrak awal |
+| 0.1.0 | Initial contract |

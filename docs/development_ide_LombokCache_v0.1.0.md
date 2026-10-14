@@ -2,29 +2,30 @@
 
 ## 1. Roadmap
 
-| Versi | Isi |
+| Version | Content |
 |---|---|
-| 0.1.1 | Tutup syarat rilis: CI dijalankan, `doctor docs/privacy/style`, coverage diukur, target `cargo-fuzz` |
-| 0.2.0 | Antarmuka adapter (berkas, database lewat LombokSQL, Redis); batas ukuran dalam byte; port Python, Go, PHP |
-| 0.3.0 | Perlindungan stampede dan refresh di latar; indeks tag O(1); varian thread-safe di Rust |
+| 0.1.1 | Close the release conditions: CI run, `doctor docs/privacy/style`, coverage measured, a `cargo-fuzz` target |
+| 0.2.0 | An adapter interface (files, databases through LombokSQL, Redis); size limits in bytes; Python, Go and PHP ports |
+| 0.3.0 | Stampede protection and background refresh; an O(1) tag index; a thread-safe variant in Rust |
 
 ## 2. Deferred scope
 
-Lihat SPEC bagian Non-goals dan README (Batasan).
+See the Non-goals section of the SPEC and the README (Known limitations).
 
-## 3. Prinsip desain kontributor
+## 3. Design principles for contributors
 
-- Kontrak dulu, test dulu; semua port lulus vector yang sama.
-- Tidak ada dependensi runtime; dev-dependency dicatat.
-- Fungsi inti murni: jam, keacakan, dan I/O dipasok pemanggil.
-- Semua waktu berasal dari jam pemanggil.
-- Setiap kasus tepi semantik (batas TTL, recency, eviksi) dicakup vector golden.
+- Contract first, tests first; all ports pass the same vectors.
+- No runtime dependencies; dev dependencies are recorded.
+- Core functions are pure: the clock, randomness and I/O are supplied by the caller.
+- All time comes from the caller's clock.
+- Every semantic edge case (TTL boundary, recency, eviction) is covered by a golden vector.
+- English is the default language for all documents, code comments and messages.
 
-## 4. Cara berkontribusi
+## 4. How to contribute
 
-Lihat `CONTRIBUTING.md`.
+See `CONTRIBUTING.md`.
 
-## 5. Pertanyaan terbuka
+## 5. Open questions
 
-- Apakah `increment` pada kunci yang ada sebaiknya dapat memperpanjang TTL lewat opsi?
-- Apakah `has` sebaiknya memperbarui recency (perilaku sebagian pustaka)?
+- Should `increment` on an existing key be able to extend the TTL through an option?
+- Should `has` update recency (the behavior of some libraries)?

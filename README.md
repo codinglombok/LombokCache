@@ -2,40 +2,40 @@
 
 [![License](https://img.shields.io/badge/license-Apache--2.0%20OR%20MIT-blue)](LICENSE-APACHE)
 
-Cache in-memory yang **deterministik**: TTL dengan jam yang dapat disuntikkan, eviksi LRU, tag untuk invalidasi berkelompok, counter atomik dalam proses, dan statistik. Tanpa dependensi runtime. Perilakunya identik di setiap port dan dibuktikan dengan skrip operasi bersama.
+A **deterministic** in-memory cache: TTL with an injectable clock, LRU eviction, tags for grouped invalidation, in-process atomic counters, and statistics. No runtime dependencies. Behavior is identical in every port and is proven by shared operation scripts.
 
 Part of the [Lombok Ecosystem](https://github.com/codinglombok).
 
-## Mengapa library ini?
+## Why this library?
 
-Cache sederhana mudah ditulis tetapi sulit diuji: TTL bergantung pada jam sistem, urutan eviksi jarang dispesifikasikan, dan semantik tepi (apakah entri kedaluwarsa tepat pada detik ke-60 atau sesudahnya, apakah `has` memperbarui urutan LRU) berbeda antar implementasi. LombokCache menetapkan semua itu secara normatif. Karena jam dipasok pemanggil, perilaku TTL dapat diuji tanpa `sleep`.
+A simple cache is easy to write but hard to test: TTL depends on the system clock, eviction order is rarely specified, and edge semantics (does an entry expire exactly at second 60 or after it, does `has` refresh the LRU order) differ between implementations. LombokCache specifies all of this normatively. Because the clock is supplied by the caller, TTL behavior can be tested without `sleep`.
 
-Skenario pemakaian:
+Usage scenarios:
 
-- **Layanan web dan API**: cache hasil query dan respons dengan invalidasi per tag (`users`, `posts`).
-- **Rate limiting dan counter**: `increment` dengan TTL untuk jendela waktu.
-- **Alat CLI dan job batch**: memoisasi hasil mahal dengan `remember`.
-- **Serverless dan edge**: cache per instans dengan batas `maxEntries` agar memori terkendali.
-- **Perangkat tertanam**: inti Rust `no_std + alloc` dengan jam dari timer perangkat keras.
+- **Web services and APIs**: cache query results and responses with per-tag invalidation (`users`, `posts`).
+- **Rate limiting and counters**: `increment` with a TTL for time windows.
+- **CLI tools and batch jobs**: memoize expensive results with `remember`.
+- **Serverless and edge**: a per-instance cache with a `maxEntries` limit to keep memory under control.
+- **Embedded devices**: a `no_std + alloc` Rust core with a clock from a hardware timer.
 
-Contoh dependen lain di ekosistem Lombok dicantumkan di `docs/map_LombokCache_v0.1.0.md`.
+Other dependents in the Lombok Ecosystem are listed in `docs/map_LombokCache_v0.1.0.md`.
 
-## Fitur
+## Features
 
-Setiap fitur di bawah ini dicakup vector di `vectors/` dan test TypeScript.
+Every feature below is covered by vectors in `vectors/` and by TypeScript tests.
 
-- `set`, `add`, `get` (dengan fallback), `peek`, `has`, `delete`, `pull`, `remember`.
-- TTL per entri atau `defaultTtl`; entri hidup selama `now < expiresAt`; `ttl` gaya Redis (`-1` tanpa kedaluwarsa, `-2` tidak ada); `touch`.
-- LRU dengan `maxEntries`: entri kedaluwarsa dibersihkan lebih dulu sebelum eviksi.
-- Tag: `invalidateTag` menghapus semua entri bertag.
-- `increment`/`decrement` bilangan bulat aman; kunci baru mulai dari 0.
+- `set`, `add`, `get` (with a fallback), `peek`, `has`, `delete`, `pull`, `remember`.
+- A TTL per entry or `defaultTtl`; an entry is alive while `now < expiresAt`; Redis-style `ttl` (`-1` for no expiry, `-2` for missing); `touch`.
+- LRU with `maxEntries`: expired entries are purged first, before any eviction.
+- Tags: `invalidateTag` removes every tagged entry.
+- Safe-integer `increment`/`decrement`; a new key starts at 0.
 - `stats`: `hits`, `misses`, `sets`, `deletes`, `evictions`, `expirations`.
-- `makeKey` untuk kunci bernamespace yang di-escape secara injektif.
-- Nilai disalin saat masuk dan keluar (tanpa aliasing); hanya data JSON.
+- `makeKey` for namespaced keys that are escaped injectively.
+- Values are copied on the way in and on the way out (no aliasing); JSON data only.
 
-## Instalasi
+## Installation
 
-Belum terbit di registry. Setelah rilis pertama:
+Not published to any registry yet. After the first release:
 
 ```bash
 npm install lombokcache      # TypeScript / JavaScript
@@ -73,36 +73,36 @@ now.set(100);
 assert_eq!(cache.get("a").unwrap(), None);
 ```
 
-## Status port
+## Port status
 
-| Port | Status | Bukti |
+| Port | Status | Evidence |
 |---|---|---|
-| Rust (`no_std + alloc`) | YA, lulus vector | `rust/tests/vectors.rs` menjalankan seluruh vector; build `thumbv7em-none-eabi` |
-| TypeScript | YA, lulus vector | `typescript/test/vectors.test.ts` menjalankan seluruh vector; ditambah test aliasing dan fuzz invarian |
-| Python, Go, PHP, Java, Kotlin, C#, C/C++, Swift, Perl | BELUM | Tidak ada kode; direncanakan setelah kontrak stabil (lihat `docs/development_ide_LombokCache_v0.1.0.md`) |
+| Rust (`no_std + alloc`) | YES, passes the vectors | `rust/tests/vectors.rs` runs every vector; `thumbv7em-none-eabi` build |
+| TypeScript | YES, passes the vectors | `typescript/test/vectors.test.ts` runs every vector, plus aliasing tests and invariant fuzzing |
+| Python, Go, PHP, Java, Kotlin, C#, C/C++, Swift, Perl | NOT YET | No code; planned once the contract is stable (see `docs/development_ide_LombokCache_v0.1.0.md`) |
 
-Vector: 142 kasus berisi 1694 langkah operasi (62 golden berekspektasi tulis tangan, 80 skrip regresi hasil pembangkit).
+Vectors: 142 cases containing 1694 operation steps (62 golden cases with hand-written expectations, 80 generated regression scripts).
 
-## Standar yang diimplementasikan
+## Standards implemented
 
-Tidak ada standar formal untuk cache in-memory. Semantik `ttl` mengikuti konvensi perintah `TTL` Redis (`-1`, `-2`); kontrak lengkap ada di `docs/SPEC_LombokCache_v0.1.0.md`.
+There is no formal standard for an in-memory cache. The semantics of `ttl` follow the Redis `TTL` command convention (`-1`, `-2`); the full contract is in `docs/SPEC_LombokCache_v0.1.0.md`.
 
-## Batasan yang diketahui
+## Known limitations
 
-- Hanya dalam proses; tidak ada adapter Redis, berkas, atau database pada 0.1.0.
-- Tidak thread-safe di Rust (`&mut self`); bungkus dengan `Mutex` bila dibagi antar thread.
-- `invalidateTag`, `prune`, dan pembersihan sebelum eviksi berbiaya O(n).
-- Tidak ada perlindungan stampede (`remember` tidak menahan pemanggil lain).
-- Hanya Rust dan TypeScript yang memiliki kode. Fuzz bersifat pseudo-fuzz, belum `cargo-fuzz`.
+- In-process only; there is no Redis, file or database adapter in 0.1.0.
+- Not thread-safe in Rust (`&mut self`); wrap it in a `Mutex` when sharing between threads.
+- `invalidateTag`, `prune` and the purge before eviction cost O(n).
+- There is no stampede protection (`remember` does not hold back other callers).
+- Only Rust and TypeScript have code. Fuzzing is pseudo-fuzzing, not `cargo-fuzz`.
 
-## Ekosistem Lombok
+## Lombok Ecosystem
 
-LombokCache tidak bergantung pada library Lombok lain (L0). Library lain dapat memakainya secara opsional; daftar dependen ada di `docs/map_LombokCache_v0.1.0.md`.
+LombokCache has no required dependency on other Lombok libraries (L0). Other libraries may use it optionally; the dependents are listed in `docs/map_LombokCache_v0.1.0.md`.
 
 ## Contributing
 
-Lihat [CONTRIBUTING.md](CONTRIBUTING.md). Untuk melaporkan kerentanan lihat [SECURITY.md](SECURITY.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md). To report a vulnerability, see [SECURITY.md](SECURITY.md).
 
-## Lisensi
+## License
 
-`Apache-2.0 OR MIT`. Lihat [LICENSE-APACHE](LICENSE-APACHE) dan [LICENSE-MIT](LICENSE-MIT).
+`Apache-2.0 OR MIT`. See [LICENSE-APACHE](LICENSE-APACHE) and [LICENSE-MIT](LICENSE-MIT).

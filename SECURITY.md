@@ -1,25 +1,25 @@
-# Kebijakan Keamanan
+# Security Policy
 
-## Versi yang didukung
+## Supported versions
 
-| Versi | Dukungan |
+| Version | Support |
 |---|---|
-| 0.1.x | Perbaikan keamanan |
+| 0.1.x | Security fixes |
 
-## Melaporkan kerentanan
+## Reporting a vulnerability
 
-Gunakan **GitHub Private Vulnerability Reporting** pada repo ini (tab Security, "Report a vulnerability"). Jangan membuka issue publik untuk kerentanan.
+Use **GitHub Private Vulnerability Reporting** on this repository (Security tab, "Report a vulnerability"). Do not open a public issue for a vulnerability.
 
-- Respons awal: paling lama 48 jam.
-- Perbaikan untuk temuan kritis: target 7 hari.
-- Pengungkapan dikoordinasikan dengan pelapor.
+- Initial response: within 48 hours.
+- Fix for critical findings: 7 days (target).
+- Disclosure is coordinated with the reporter.
 
-## Cakupan
+## Scope
 
-Dalam cakupan: `Cache` dan validasi kunci, khususnya cara apa pun agar entri kedaluwarsa terbaca, batas `maxEntries` terlampaui, nilai bocor antar kunci, atau masukan menyebabkan panic, crash, atau waktu eksekusi tak terbatas.
+In scope: `Cache` and key validation, in particular any way for an expired entry to be read, for the `maxEntries` limit to be exceeded, for a value to leak between keys, or for an input to cause a panic, a crash or unbounded execution time.
 
-Di luar cakupan: adapter penyimpanan eksternal (Redis, berkas, database) yang ditulis aplikasi.
+Out of scope: external storage adapters (Redis, files, databases) written by the application.
 
-## Model ancaman ringkas
+## Short threat model
 
-Lihat bagian Keamanan pada `docs/SPEC_LombokCache_v0.1.0.md`.
+See section 8 of `docs/SPEC_LombokCache_v0.1.0.md`.
